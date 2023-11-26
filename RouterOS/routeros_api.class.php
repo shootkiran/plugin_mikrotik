@@ -86,15 +86,14 @@ class RouterosAPI {
      *
      * @return boolean                If we are connected or not
      */
-    public function connect($ip, $login, $password) {
+    public function connect($ip, $login, $password,$port=8728) {
         for ($ATTEMPT = 1; $ATTEMPT <= $this->attempts; $ATTEMPT++) {
             $this->connected = false;
             $PROTOCOL = ($this->ssl ? 'ssl://' : '' );
-            $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $PROTOCOL . $ip . ':' . $this->port . '...');
-            $this->socket = @fsockopen($PROTOCOL . $ip, $this->port, $this->error_no, $this->error_str, $this->timeout);
+            $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $PROTOCOL . $ip . ':' . $port . '...');
+            $this->socket = @fsockopen($PROTOCOL . $ip, $port, $this->error_no, $this->error_str, $this->timeout);
             if ($this->socket) {
                 socket_set_timeout($this->socket, $this->timeout);
-
                 // Try new post-v6.43 API first
                 $this->write('/login', false);
                 $this->write('=name=' . $login, false);

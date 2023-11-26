@@ -1,38 +1,40 @@
 <?php
-/*
- +-------------------------------------------------------------------------+
- | Copyright (C) 2004-2023 The Cacti Group                                 |
- |                                                                         |
- | This program is free software; you can redistribute it and/or           |
- | modify it under the terms of the GNU General Public License             |
- | as published by the Free Software Foundation; either version 2          |
- | of the License, or (at your option) any later version.                  |
- |                                                                         |
- | This program is distributed in the hope that it will be useful,         |
- | but WITHOUT ANY WARRANTY; without even the implied warranty of          |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           |
- | GNU General Public License for more details.                            |
- +-------------------------------------------------------------------------+
- | Cacti: The Complete RRDTool-based Graphing Solution                     |
- +-------------------------------------------------------------------------+
- | This code is designed, written, and maintained by the Cacti Group. See  |
- | about.php and/or the AUTHORS file for specific developer information.   |
- +-------------------------------------------------------------------------+
- | http://www.cacti.net/                                                   |
- +-------------------------------------------------------------------------+
-*/
 
-function plugin_mikrotik_install() {
-	# graph setup all arrays needed for automation
-	api_plugin_register_hook('mikrotik', 'config_arrays',         'mikrotik_config_arrays',         'setup.php');
-	api_plugin_register_hook('mikrotik', 'config_settings',       'mikrotik_config_settings',       'setup.php');
-	api_plugin_register_hook('mikrotik', 'draw_navigation_text',  'mikrotik_draw_navigation_text',  'setup.php');
-	api_plugin_register_hook('mikrotik', 'poller_bottom',         'mikrotik_poller_bottom',         'setup.php');
-	api_plugin_register_hook('mikrotik', 'top_header_tabs',       'mikrotik_show_tab',              'setup.php');
-	api_plugin_register_hook('mikrotik', 'top_graph_header_tabs', 'mikrotik_show_tab',              'setup.php');
-	api_plugin_register_hook('mikrotik', 'host_edit_top',         'mikrotik_host_top',              'setup.php');
-	api_plugin_register_hook('mikrotik', 'host_save',             'mikrotik_host_save',             'setup.php');
-	api_plugin_register_hook('mikrotik', 'host_delete',           'mikrotik_host_delete',           'setup.php');
+/*
+ * +-------------------------------------------------------------------------+
+ * | Copyright (C) 2004-2023 The Cacti Group                                 |
+ * |                                                                         |
+ * | This program is free software; you can redistribute it and/or           |
+ * | modify it under the terms of the GNU General Public License             |
+ * | as published by the Free Software Foundation; either version 2          |
+ * | of the License, or (at your option) any later version.                  |
+ * |                                                                         |
+ * | This program is distributed in the hope that it will be useful,         |
+ * | but WITHOUT ANY WARRANTY; without even the implied warranty of          |
+ * | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           |
+ * | GNU General Public License for more details.                            |
+ * +-------------------------------------------------------------------------+
+ * | Cacti: The Complete RRDTool-based Graphing Solution                     |
+ * +-------------------------------------------------------------------------+
+ * | This code is designed, written, and maintained by the Cacti Group. See  |
+ * | about.php and/or the AUTHORS file for specific developer information.   |
+ * +-------------------------------------------------------------------------+
+ * | http://www.cacti.net/                                                   |
+ * +-------------------------------------------------------------------------+
+ */
+
+function plugin_mikrotik_install()
+{
+	// graph setup all arrays needed for automation
+	api_plugin_register_hook('mikrotik', 'config_arrays', 'mikrotik_config_arrays', 'setup.php');
+	api_plugin_register_hook('mikrotik', 'config_settings', 'mikrotik_config_settings', 'setup.php');
+	api_plugin_register_hook('mikrotik', 'draw_navigation_text', 'mikrotik_draw_navigation_text', 'setup.php');
+	api_plugin_register_hook('mikrotik', 'poller_bottom', 'mikrotik_poller_bottom', 'setup.php');
+	api_plugin_register_hook('mikrotik', 'top_header_tabs', 'mikrotik_show_tab', 'setup.php');
+	api_plugin_register_hook('mikrotik', 'top_graph_header_tabs', 'mikrotik_show_tab', 'setup.php');
+	api_plugin_register_hook('mikrotik', 'host_edit_top', 'mikrotik_host_top', 'setup.php');
+	api_plugin_register_hook('mikrotik', 'host_save', 'mikrotik_host_save', 'setup.php');
+	api_plugin_register_hook('mikrotik', 'host_delete', 'mikrotik_host_delete', 'setup.php');
 
 	api_plugin_register_realm('mikrotik', 'mikrotik.php', __('MikroTik Viewer', 'mikrotik'), 1);
 	api_plugin_register_realm('mikrotik', 'mikrotik_users.php', __('MikroTik Admin', 'mikrotik'), 1);
@@ -40,7 +42,8 @@ function plugin_mikrotik_install() {
 	mikrotik_setup_table();
 }
 
-function plugin_mikrotik_uninstall() {
+function plugin_mikrotik_uninstall()
+{
 	// Do any extra Uninstall stuff here
 	db_execute('DROP TABLE IF EXISTS `plugin_mikrotik_system`');
 	db_execute('DROP TABLE IF EXISTS `plugin_mikrotik_system_health`');
@@ -59,25 +62,30 @@ function plugin_mikrotik_uninstall() {
 	db_execute('DROP TABLE IF EXISTS `plugin_mikrotik_lists`');
 }
 
-function plugin_mikrotik_check_config() {
+function plugin_mikrotik_check_config()
+{
 	// Here we will check to ensure everything is configured
 	mikrotik_check_upgrade();
 	return true;
 }
 
-function plugin_mikrotik_upgrade() {
+function plugin_mikrotik_upgrade()
+{
 	// Here we will upgrade to the newest version
 	mikrotik_check_upgrade();
 	return true;
 }
 
-function plugin_mikrotik_version() {
+function plugin_mikrotik_version()
+{
 	global $config;
+
 	$info = parse_ini_file($config['base_path'] . '/plugins/mikrotik/INFO', true);
 	return $info['info'];
 }
 
-function mikrotik_check_upgrade() {
+function mikrotik_check_upgrade()
+{
 	global $config, $database_default;
 
 	// Let's only run this check if we are on a page that actually needs the data
@@ -86,9 +94,9 @@ function mikrotik_check_upgrade() {
 		return;
 	}
 
-	$info    = plugin_mikrotik_version();
+	$info = plugin_mikrotik_version();
 	$current = $info['version'];
-	$old     = db_fetch_cell("SELECT version FROM plugin_config WHERE directory='mikrotik'");
+	$old = db_fetch_cell("SELECT version FROM plugin_config WHERE directory='mikrotik'");
 
 	if ($current != $old) {
 		if (api_plugin_is_enabled('mikrotik')) {
@@ -96,11 +104,11 @@ function mikrotik_check_upgrade() {
 		}
 
 		if (!db_column_exists('plugin_mikrotik_trees', 'prevPackets')) {
-			db_execute("ALTER TABLE plugin_mikrotik_trees ADD COLUMN prevPackets BIGINT UNSIGNED default NULL AFTER prevBytes");
-			db_execute("ALTER TABLE plugin_mikrotik_trees ADD COLUMN prevHCBytes BIGINT UNSIGNED default NULL AFTER prevPackets");
-			db_execute("ALTER TABLE plugin_mikrotik_trees ADD COLUMN curBytes BIGINT UNSIGNED default null AFTER HCBytes");
-			db_execute("ALTER TABLE plugin_mikrotik_trees ADD COLUMN curPackets BIGINT UNSIGNED default null AFTER curBytes");
-			db_execute("ALTER TABLE plugin_mikrotik_trees ADD COLUMN curHCBytes BIGINT UNSIGNED default null AFTER curPackets");
+			db_execute('ALTER TABLE plugin_mikrotik_trees ADD COLUMN prevPackets BIGINT UNSIGNED default NULL AFTER prevBytes');
+			db_execute('ALTER TABLE plugin_mikrotik_trees ADD COLUMN prevHCBytes BIGINT UNSIGNED default NULL AFTER prevPackets');
+			db_execute('ALTER TABLE plugin_mikrotik_trees ADD COLUMN curBytes BIGINT UNSIGNED default null AFTER HCBytes');
+			db_execute('ALTER TABLE plugin_mikrotik_trees ADD COLUMN curPackets BIGINT UNSIGNED default null AFTER curBytes');
+			db_execute('ALTER TABLE plugin_mikrotik_trees ADD COLUMN curHCBytes BIGINT UNSIGNED default null AFTER curPackets');
 		}
 
 		if (!db_column_exists('plugin_mikrotik_system', 'firmwareVersion')) {
@@ -113,16 +121,19 @@ function mikrotik_check_upgrade() {
 
 		if (!db_column_exists('plugin_mikrotik_users', 'userType')) {
 			db_execute("ALTER TABLE plugin_mikrotik_users ADD COLUMN userType int unsigned DEFAULT '0' AFTER `index`");
-			db_execute("ALTER TABLE plugin_mikrotik_users DROP PRIMARY KEY, ADD PRIMARY KEY (`host_id`,`name`,`serverID`,`userType`)");
+			db_execute('ALTER TABLE plugin_mikrotik_users DROP PRIMARY KEY, ADD PRIMARY KEY (`host_id`,`name`,`serverID`,`userType`)');
 		}
 
-		if (!db_table_exists('plugin_mikrotik_dhcp') ||
+		if (
+			!db_table_exists('plugin_mikrotik_dhcp') ||
 			!db_table_exists('plugin_mikrotik_dns') ||
-			!db_table_exists('plugin_mikrotik_lists')) {
+			!db_table_exists('plugin_mikrotik_lists')
+		) {
 			mikrotik_setup_table();
 		}
 
-		db_execute_prepared('UPDATE plugin_config
+		db_execute_prepared(
+			'UPDATE plugin_config
 			SET version = ?, name = ?, author = ?, webpage = ?
 			WHERE directory = ?',
 			array(
@@ -138,13 +149,17 @@ function mikrotik_check_upgrade() {
 	}
 }
 
-function mikrotik_delete_graphs_and_data_sources_from_hash($graph_template_id) {
+function mikrotik_delete_graphs_and_data_sources_from_hash($graph_template_id)
+{
 	$graphs = array_rekey(
-		db_fetch_assoc_prepared('SELECT id
+		db_fetch_assoc_prepared(
+			'SELECT id
 			FROM graph_local
 			WHERE graph_template_id = ?',
-			array($graph_template_id)),
-		'id', 'id'
+			array($graph_template_id)
+		),
+		'id',
+		'id'
 	);
 
 	if (cacti_sizeof($graphs)) {
@@ -195,12 +210,15 @@ function mikrotik_delete_graphs_and_data_sources_from_hash($graph_template_id) {
 	}
 }
 
-function mikrotik_check_dependencies() {
+function mikrotik_check_dependencies()
+{
 	return true;
 }
 
-function mikrotik_setup_table() {
+function mikrotik_setup_table()
+{
 	global $config, $database_default;
+
 	include_once($config['library_path'] . '/database.php');
 
 	db_execute("CREATE TABLE IF NOT EXISTS `plugin_mikrotik_system_health` (
@@ -633,6 +651,7 @@ function mikrotik_setup_table() {
 
 	db_execute("CREATE TABLE IF NOT EXISTS `plugin_mikrotik_credentials` (
 		`host_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+		`api_port` int(20) DEFAULT '8728',
 		`user` varchar(20) DEFAULT '',
 		`password` varchar(40) DEFAULT '',
 		PRIMARY KEY (`host_id`))
@@ -708,14 +727,17 @@ function mikrotik_setup_table() {
 		COMMENT='Holds mappings from MAC Addres to Hostname'");
 }
 
-function mikrotik_poller_bottom() {
+function mikrotik_poller_bottom()
+{
 	global $config;
+
 	include_once($config['base_path'] . '/lib/poller.php');
 
 	exec_background(read_config_option('path_php_binary'), ' -q ' . $config['base_path'] . '/plugins/mikrotik/poller_mikrotik.php -M');
 }
 
-function mikrotik_config_settings() {
+function mikrotik_config_settings()
+{
 	global $tabs, $settings, $mikrotik_frequencies, $mikrotik_retention, $item_rows;
 
 	$tabs['mikrotik'] = __('MikroTik', 'mikrotik');
@@ -723,105 +745,105 @@ function mikrotik_config_settings() {
 		'mikrotik_header' => array(
 			'friendly_name' => __('MikroTik General Settings', 'mikrotik'),
 			'method' => 'spacer',
-			),
+		),
 		'mikrotik_enabled' => array(
 			'friendly_name' => __('MikroTik Poller Enabled', 'mikrotik'),
 			'description' => __('Check this box, if you want MikroTik polling to be enabled.  Otherwise, the poller will not function.', 'mikrotik'),
 			'method' => 'checkbox',
 			'default' => 'on'
-			),
+		),
 		'mikrotik_api_enabled' => array(
 			'friendly_name' => __('MikroTik API Polling Enabled', 'mikrotik'),
-			'description' => __('Check this box, if you want Cacti to poll various settings using the MikroTik API.  If for some reason you don\'t have access to the MikroTik API, uncheck this option.', 'mikrotik'),
+			'description' => __("Check this box, if you want Cacti to poll various settings using the MikroTik API.  If for some reason you don't have access to the MikroTik API, uncheck this option.", 'mikrotik'),
 			'method' => 'checkbox',
 			'default' => 'on'
-			),
+		),
 		'mikrotik_autodiscovery' => array(
 			'friendly_name' => __('Automatically Discover Cacti Devices', 'mikrotik'),
 			'description' => __('Do you wish to automatically scan for and add devices which support the MikroTik MIB from the Cacti host table?', 'mikrotik'),
 			'method' => 'checkbox',
 			'default' => 'on'
-			),
+		),
 		'mikrotik_autopurge' => array(
 			'friendly_name' => __('Automatically Purge Devices', 'mikrotik'),
 			'description' => __('Do you wish to automatically purge devices that are removed from the Cacti system?', 'mikrotik'),
 			'method' => 'checkbox',
 			'default' => 'on'
-			),
+		),
 		'mikrotik_concurrent_processes' => array(
 			'friendly_name' => __('Maximum Concurrent Collectors', 'mikrotik'),
 			'description' => __('What is the maximum number of concurrent collector process that you want to run at one time?', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '10',
 			'array' => array(
-				1  => __('%d Process', 1, 'mikrotik'),
-				2  => __('%d Processes', 2, 'mikrotik'),
-				3  => __('%d Processes', 3, 'mikrotik'),
-				4  => __('%d Processes', 4, 'mikrotik'),
-				5  => __('%d Processes', 5, 'mikrotik'),
+				1 => __('%d Process', 1, 'mikrotik'),
+				2 => __('%d Processes', 2, 'mikrotik'),
+				3 => __('%d Processes', 3, 'mikrotik'),
+				4 => __('%d Processes', 4, 'mikrotik'),
+				5 => __('%d Processes', 5, 'mikrotik'),
 				10 => __('%d Processes', 10, 'mikrotik'),
 				20 => __('%d Processes', 20, 'mikrotik'),
 				30 => __('%d Processes', 30, 'mikrotik'),
 				40 => __('%d Processes', 40, 'mikrotik'),
 				50 => __('%d Processes', 50, 'mikrotik')
-				)
-			),
+			)
+		),
 		'mikrotik_autodiscovery_header' => array(
 			'friendly_name' => __('Auto Discovery Settings', 'mikrotik'),
 			'method' => 'spacer',
-			),
+		),
 		'mikrotik_autodiscovery_freq' => array(
 			'friendly_name' => __('Auto Discovery Frequency', 'mikrotik'),
 			'description' => __('How often do you want to look for new Cacti Devices?', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			),
+		),
 		'mikrotik_dhcp_header' => array(
 			'friendly_name' => __('DHCP/DNS/List Settings', 'mikrotik'),
 			'method' => 'spacer',
-			),
+		),
 		'mikrotik_dhcp_retention' => array(
 			'friendly_name' => __('DHCP Retention', 'mikrotik'),
 			'description' => __('How long would you like to retain DHCP IP registration history?', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '2419200',
 			'array' => $mikrotik_retention
-			),
+		),
 		'mikrotik_dns_retention' => array(
 			'friendly_name' => __('DNS Retention', 'mikrotik'),
 			'description' => __('How long would you like to retain DNS Cache history?', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '2419200',
 			'array' => $mikrotik_retention
-			),
+		),
 		'mikrotik_list_retention' => array(
 			'friendly_name' => __('Address List Retention', 'mikrotik'),
 			'description' => __('How long would you like to retain Address List history?', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '2419200',
 			'array' => $mikrotik_retention
-			),
+		),
 		'mikrotik_automation_header' => array(
 			'friendly_name' => __('Device Graph Automation', 'mikrotik'),
 			'method' => 'spacer',
-			),
+		),
 		'mikrotik_automation_frequency' => array(
 			'friendly_name' => __('Automatically Add New Graphs', 'mikrotik'),
 			'description' => __('How often do you want to check for new objects to graph?', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '0',
 			'array' => array(
-				0    => __('Never', 'mikrotik'),
-				10   => __('%d Minutes', 10, 'mikrotik'),
-				20   => __('%d Minutes', 20, 'mikrotik'),
-				30   => __('%d Minutes', 30, 'mikrotik'),
-				60   => __('%d Hour', 1, 'mikrotik'),
-				720  => __('%d Hours', 12, 'mikrotik'),
+				0 => __('Never', 'mikrotik'),
+				10 => __('%d Minutes', 10, 'mikrotik'),
+				20 => __('%d Minutes', 20, 'mikrotik'),
+				30 => __('%d Minutes', 30, 'mikrotik'),
+				60 => __('%d Hour', 1, 'mikrotik'),
+				720 => __('%d Hours', 12, 'mikrotik'),
 				1440 => __('%d Day', 1, 'mikrotik'),
 				2880 => __('%d Days', 2, 'mikrotik')
-				)
-			),
+			)
+		),
 		'mikrotik_user_exclusion' => array(
 			'friendly_name' => __('Exclude Users RegEx', 'mikrotik'),
 			'description' => __('User names that match this regex will not be graphed automatically', 'mikrotik'),
@@ -829,106 +851,107 @@ function mikrotik_config_settings() {
 			'default' => '(^T-$)',
 			'size' => '40',
 			'max_length' => '40',
-			),
+		),
 		'mikrotik_user_exclusion_ttl' => array(
 			'friendly_name' => __('Exclude Users Time to Live', 'mikrotik'),
-			'description' => __('How long should an excluded user\'s data be preserved after they have disconnected.', 'mikrotik'),
+			'description' => __("How long should an excluded user's data be preserved after they have disconnected.", 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '3600',
 			'array' => array(
-				'1800'  => __('%d Minutes', 30, 'mikrotik'),
-				'3600'  => __('%d Hour', 1, 'mikrotik'),
-				'7200'  => __('%d Hours', 2, 'mikrotik'),
+				'1800' => __('%d Minutes', 30, 'mikrotik'),
+				'3600' => __('%d Hour', 1, 'mikrotik'),
+				'7200' => __('%d Hours', 2, 'mikrotik'),
 				'14400' => __('%d Hours', 4, 'mikrotik'),
 				'86400' => __('%d Day', 1, 'mikrotik')
-				),
 			),
+		),
 		'mikrotik_frequencies' => array(
 			'friendly_name' => __('MikroTik Device Collection Frequencies', 'mikrotik'),
 			'method' => 'spacer',
-			),
+		),
 		'mikrotik_storage_freq' => array(
 			'friendly_name' => __('Storage Frequency', 'mikrotik'),
 			'description' => __('How often do you want to scan Storage Statistics?', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			),
+		),
 		'mikrotik_processor_freq' => array(
 			'friendly_name' => __('Processor Frequency', 'mikrotik'),
 			'description' => __('How often do you want to scan Device Processor Statistics?', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			),
+		),
 		'mikrotik_interfaces_freq' => array(
 			'friendly_name' => __('Interfaces Frequency', 'mikrotik'),
 			'description' => __('How often do you want to scan the Interfaces?', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			),
+		),
 		'mikrotik_dns_dhcp_list_freq' => array(
 			'friendly_name' => __('DNS/DHCP/List Frequency', 'mikrotik'),
 			'description' => __('How often do you want to scan the DNS/DHCP/Address Lists?', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			),
+		),
 		'mikrotik_queue_tree' => array(
 			'friendly_name' => __('MikroTik Queue/Tree Collection Frequencies', 'mikrotik'),
 			'method' => 'spacer',
-			),
+		),
 		'mikrotik_queues_freq' => array(
 			'friendly_name' => __('Simple Queue/PPPoe Frequency', 'mikrotik'),
 			'description' => __('How often do you want to scan Simple Queue Statistics?  Select <b>Disabled</b> to remove this feature.', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			),
+		),
 		'mikrotik_trees_freq' => array(
 			'friendly_name' => __('Queue Trees Frequency', 'mikrotik'),
 			'description' => __('How often do you want to scan the Queue Trees?  Select <b>Disabled</b> to remove this feature.', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			),
+		),
 		'mikrotik_wireless' => array(
 			'friendly_name' => __('MikroTik Wireless Collection Frequencies', 'mikrotik'),
 			'method' => 'spacer',
-			),
+		),
 		'mikrotik_users_freq' => array(
 			'friendly_name' => __('Wireless HotSpot Users Frequency', 'mikrotik'),
 			'description' => __('How often do you want to scan Wireless User Statistics?  Select <b>Disabled</b> to remove this feature.', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			),
+		),
 		'mikrotik_wireless_aps_freq' => array(
 			'friendly_name' => __('Wireless Access Point Frequency', 'mikrotik'),
 			'description' => __('How often do you want to scan the Wireless Access Points?  Select <b>Disabled</b> to remove this feature.', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			),
+		),
 		'mikrotik_wireless_reg_freq' => array(
 			'friendly_name' => __('Wireless Registrations Frequency', 'mikrotik'),
 			'description' => __('How often do you want to scan the Wireless Registrations?  Select <b>Disabled</b> to remove this feature.', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			),
+		),
 		'mikrotik_wireless_sta_freq' => array(
 			'friendly_name' => __('Wireless Stations Frequency', 'mikrotik'),
 			'description' => __('How often do you want to scan the Wireless Stations?  Select <b>Disabled</b> to remove this feature.', 'mikrotik'),
 			'method' => 'drop_array',
 			'default' => '300',
 			'array' => $mikrotik_frequencies
-			)
-		);
+		)
+	);
 }
 
-function mikrotik_config_arrays() {
+function mikrotik_config_arrays()
+{
 	global $menu, $messages, $mikrotik_frequencies, $mikrotik_retention;
 	global $mikrotikSystem, $mikrotikTrees, $mikrotikQueueSimpleEntry, $mikrotikUsers;
 	global $mikrotikProcessor, $mikrotikStorage, $mikrotikInterfaces, $mikrotikWirelessAps;
@@ -1001,17 +1024,17 @@ function mikrotik_config_arrays() {
 	);
 
 	$device_health_hashes = array(
-		'HlTwelveVoltage'        => '1d877789bec088d883549afd7df9fae5',
+		'HlTwelveVoltage' => '1d877789bec088d883549afd7df9fae5',
 		'HlThreeDotThreeVoltage' => '59730f20f092f0b3ac1eab830f8122bf',
-		'HlFiveVoltage'          => 'dbed5f0a76bdf28db7778912caa916e0',
-		'HlCoreVoltage'          => '5655ad58420de8558f9c389bce041ecf',
-		'HlCpuTemperature'       => '5a78c04ce733347648d9abf9de79e5ee',
-		'HlCurrent'              => 'd75fd3f8165d7de9108cb9df864f8b6b',
-		'HlPower'                => '4667d991a762625ded916a2b53d8ce4f',
+		'HlFiveVoltage' => 'dbed5f0a76bdf28db7778912caa916e0',
+		'HlCoreVoltage' => '5655ad58420de8558f9c389bce041ecf',
+		'HlCpuTemperature' => '5a78c04ce733347648d9abf9de79e5ee',
+		'HlCurrent' => 'd75fd3f8165d7de9108cb9df864f8b6b',
+		'HlPower' => '4667d991a762625ded916a2b53d8ce4f',
 		'HlProcessorTemperature' => '05b5e6381976d49dc460418551dc8ccf',
-		'HlSensorTemperature'    => 'c8f7d27b3eede759c355dfe075995620',
-		'HlTemperature'          => 'bf336909dbede294a0dbfe77082b64f6',
-		'HlVoltage'              => 'a8d04f1326b164ca9dd5368ea91dff67'
+		'HlSensorTemperature' => 'c8f7d27b3eede759c355dfe075995620',
+		'HlTemperature' => 'bf336909dbede294a0dbfe77082b64f6',
+		'HlVoltage' => 'a8d04f1326b164ca9dd5368ea91dff67'
 	);
 
 	$device_query_hashes = array(
@@ -1084,200 +1107,200 @@ function mikrotik_config_arrays() {
 	);
 
 	$mikrotik_frequencies = array(
-		-1    => __('Disabled', 'mikrotik'),
-		60    => __('%d Minute', 1, 'mikrotik'),
-		300   => __('%d Minutes', 5, 'mikrotik'),
-		600   => __('%d Minutes', 10, 'mikrotik'),
-		1200  => __('%d Minutes', 20, 'mikrotik'),
-		3600  => __('%d Hour', 1, 'mikrotik'),
-		7200  => __('%d Hours', 2, 'mikrotik'),
+		-1 => __('Disabled', 'mikrotik'),
+		60 => __('%d Minute', 1, 'mikrotik'),
+		300 => __('%d Minutes', 5, 'mikrotik'),
+		600 => __('%d Minutes', 10, 'mikrotik'),
+		1200 => __('%d Minutes', 20, 'mikrotik'),
+		3600 => __('%d Hour', 1, 'mikrotik'),
+		7200 => __('%d Hours', 2, 'mikrotik'),
 		14400 => __('%d Hours', 4, 'mikrotik'),
 		43200 => __('%d Hours', 12, 'mikrotik'),
 		86400 => __('%d Day', 1, 'mikrotik')
 	);
 
 	$mikrotik_retention = array(
-		-1       => __('Indefinite', 'mikrotik'),
-		86400    => __('%d Day',    1, 'mikrotik'),
-		172800   => __('%d Days',   2, 'mikrotik'),
-		259200   => __('%d Days',   3, 'mikrotik'),
-		604800   => __('%d Week',   1, 'mikrotik'),
-		1209600  => __('%d Weeks',  2, 'mikrotik'),
-		2419200  => __('%d Weeks',  4, 'mikrotik'),
-		5184000  => __('%d Months', 2, 'mikrotik'),
+		-1 => __('Indefinite', 'mikrotik'),
+		86400 => __('%d Day', 1, 'mikrotik'),
+		172800 => __('%d Days', 2, 'mikrotik'),
+		259200 => __('%d Days', 3, 'mikrotik'),
+		604800 => __('%d Week', 1, 'mikrotik'),
+		1209600 => __('%d Weeks', 2, 'mikrotik'),
+		2419200 => __('%d Weeks', 4, 'mikrotik'),
+		5184000 => __('%d Months', 2, 'mikrotik'),
 		15552000 => __('%d Months', 6, 'mikrotik'),
-		31536000 => __('%d Year',   1, 'mikrotik')
+		31536000 => __('%d Year', 1, 'mikrotik')
 	);
 
 	$mikrotikSystem = array(
-		'baseOID'     => '.1.3.6.1.2.1.25.1.',
-		'uptime'      => '.1.3.6.1.2.1.25.1.1.0',
-		'date'        => '.1.3.6.1.2.1.25.1.2.0',
-		'processes'   => '.1.3.6.1.2.1.1.7.0',
-		'memory'      => '.1.3.6.1.2.1.25.2.2.0',
-		'sysDescr'    => '.1.3.6.1.2.1.1.1.0',
+		'baseOID' => '.1.3.6.1.2.1.25.1.',
+		'uptime' => '.1.3.6.1.2.1.25.1.1.0',
+		'date' => '.1.3.6.1.2.1.25.1.2.0',
+		'processes' => '.1.3.6.1.2.1.1.7.0',
+		'memory' => '.1.3.6.1.2.1.25.2.2.0',
+		'sysDescr' => '.1.3.6.1.2.1.1.1.0',
 		'sysObjectID' => '.1.3.6.1.2.1.1.2.0',
-		'sysUptime'   => '.1.3.6.1.2.1.1.3.0',
-		'sysContact'  => '.1.3.6.1.2.1.1.4.0',
-		'sysName'     => '.1.3.6.1.2.1.1.5.0',
+		'sysUptime' => '.1.3.6.1.2.1.1.3.0',
+		'sysContact' => '.1.3.6.1.2.1.1.4.0',
+		'sysName' => '.1.3.6.1.2.1.1.5.0',
 		'sysLocation' => '.1.3.6.1.2.1.1.6.0'
 	);
 
 	$mikrotikStorage = array(
-		'baseOID'         => '.1.3.6.1.2.1.25.2.3',
-		'index'           => '.1.3.6.1.2.1.25.2.3.1.1',
-		'type'            => '.1.3.6.1.2.1.25.2.3.1.2',
-		'description'     => '.1.3.6.1.2.1.25.2.3.1.3',
+		'baseOID' => '.1.3.6.1.2.1.25.2.3',
+		'index' => '.1.3.6.1.2.1.25.2.3.1.1',
+		'type' => '.1.3.6.1.2.1.25.2.3.1.2',
+		'description' => '.1.3.6.1.2.1.25.2.3.1.3',
 		'allocationUnits' => '.1.3.6.1.2.1.25.2.3.1.4',
-		'size'            => '.1.3.6.1.2.1.25.2.3.1.5',
-		'used'            => '.1.3.6.1.2.1.25.2.3.1.6',
-		'failures'        => '.1.3.6.1.2.1.25.2.3.1.7'
+		'size' => '.1.3.6.1.2.1.25.2.3.1.5',
+		'used' => '.1.3.6.1.2.1.25.2.3.1.6',
+		'failures' => '.1.3.6.1.2.1.25.2.3.1.7'
 	);
 
 	$mikrotikUsers = array(
-		'baseOID'         => '.1.3.6.1.4.1.14988.1.1.5.1.1',
-		'serverId'        => '.1.3.6.1.4.1.14988.1.1.5.1.1.2',
-		'name'            => '.1.3.6.1.4.1.14988.1.1.5.1.1.3',
-		'domain'          => '.1.3.6.1.4.1.14988.1.1.5.1.1.4',
-		'ip'              => '.1.3.6.1.4.1.14988.1.1.5.1.1.5',
-		'mac'             => '.1.3.6.1.4.1.14988.1.1.5.1.1.6',
-		'connectTime'     => '.1.3.6.1.4.1.14988.1.1.5.1.1.7',
-		'validTillTime'   => '.1.3.6.1.4.1.14988.1.1.5.1.1.8',
-		'idleStartTime'   => '.1.3.6.1.4.1.14988.1.1.5.1.1.9',
-		'idleTimeout'     => '.1.3.6.1.4.1.14988.1.1.5.1.1.10',
-		'pingTimeout'     => '.1.3.6.1.4.1.14988.1.1.5.1.1.11',
-		'bytesIn'         => '.1.3.6.1.4.1.14988.1.1.5.1.1.12',
-		'bytesOut'        => '.1.3.6.1.4.1.14988.1.1.5.1.1.13',
-		'packetsIn'       => '.1.3.6.1.4.1.14988.1.1.5.1.1.14',
-		'packetsOut'      => '.1.3.6.1.4.1.14988.1.1.5.1.1.15',
-		'limitBytesIn'    => '.1.3.6.1.4.1.14988.1.1.5.1.1.16',
-		'limitBytesOut'   => '.1.3.6.1.4.1.14988.1.1.5.1.1.17',
-		'advertStatus'    => '.1.3.6.1.4.1.14988.1.1.5.1.1.18',
-		'radius'          => '.1.3.6.1.4.1.14988.1.1.5.1.1.19',
+		'baseOID' => '.1.3.6.1.4.1.14988.1.1.5.1.1',
+		'serverId' => '.1.3.6.1.4.1.14988.1.1.5.1.1.2',
+		'name' => '.1.3.6.1.4.1.14988.1.1.5.1.1.3',
+		'domain' => '.1.3.6.1.4.1.14988.1.1.5.1.1.4',
+		'ip' => '.1.3.6.1.4.1.14988.1.1.5.1.1.5',
+		'mac' => '.1.3.6.1.4.1.14988.1.1.5.1.1.6',
+		'connectTime' => '.1.3.6.1.4.1.14988.1.1.5.1.1.7',
+		'validTillTime' => '.1.3.6.1.4.1.14988.1.1.5.1.1.8',
+		'idleStartTime' => '.1.3.6.1.4.1.14988.1.1.5.1.1.9',
+		'idleTimeout' => '.1.3.6.1.4.1.14988.1.1.5.1.1.10',
+		'pingTimeout' => '.1.3.6.1.4.1.14988.1.1.5.1.1.11',
+		'bytesIn' => '.1.3.6.1.4.1.14988.1.1.5.1.1.12',
+		'bytesOut' => '.1.3.6.1.4.1.14988.1.1.5.1.1.13',
+		'packetsIn' => '.1.3.6.1.4.1.14988.1.1.5.1.1.14',
+		'packetsOut' => '.1.3.6.1.4.1.14988.1.1.5.1.1.15',
+		'limitBytesIn' => '.1.3.6.1.4.1.14988.1.1.5.1.1.16',
+		'limitBytesOut' => '.1.3.6.1.4.1.14988.1.1.5.1.1.17',
+		'advertStatus' => '.1.3.6.1.4.1.14988.1.1.5.1.1.18',
+		'radius' => '.1.3.6.1.4.1.14988.1.1.5.1.1.19',
 		'blockedByAdvert' => '.1.3.6.1.4.1.14988.1.1.5.1.1.20',
 	);
 
 	$mikrotikTrees = array(
-		'name'        => '.1.3.6.1.4.1.14988.1.1.2.2.1.2',
-		'flow'        => '.1.3.6.1.4.1.14988.1.1.2.2.1.3',
+		'name' => '.1.3.6.1.4.1.14988.1.1.2.2.1.2',
+		'flow' => '.1.3.6.1.4.1.14988.1.1.2.2.1.3',
 		'parentIndex' => '.1.3.6.1.4.1.14988.1.1.2.2.1.4',
-		'bytes'       => '.1.3.6.1.4.1.14988.1.1.2.2.1.5',
-		'packets'     => '.1.3.6.1.4.1.14988.1.1.2.2.1.6',
-		'HCBytes'     => '.1.3.6.1.4.1.14988.1.1.2.2.1.7'
+		'bytes' => '.1.3.6.1.4.1.14988.1.1.2.2.1.5',
+		'packets' => '.1.3.6.1.4.1.14988.1.1.2.2.1.6',
+		'HCBytes' => '.1.3.6.1.4.1.14988.1.1.2.2.1.7'
 	);
 
 	$mikrotikQueueSimpleEntry = array(
-		'name'       => '.1.3.6.1.4.1.14988.1.1.2.1.1.2',
-		'srcAddr'    => '.1.3.6.1.4.1.14988.1.1.2.1.1.3',
-		'srcMask'    => '.1.3.6.1.4.1.14988.1.1.2.1.1.4',
-		'dstAddr'    => '.1.3.6.1.4.1.14988.1.1.2.1.1.5',
-		'dstMask'    => '.1.3.6.1.4.1.14988.1.1.2.1.1.6',
-		'iFace'      => '.1.3.6.1.4.1.14988.1.1.2.1.1.7',
-		'BytesIn'    => '.1.3.6.1.4.1.14988.1.1.2.1.1.8',
-		'BytesOut'   => '.1.3.6.1.4.1.14988.1.1.2.1.1.9',
-		'PacketsIn'  => '.1.3.6.1.4.1.14988.1.1.2.1.1.10',
+		'name' => '.1.3.6.1.4.1.14988.1.1.2.1.1.2',
+		'srcAddr' => '.1.3.6.1.4.1.14988.1.1.2.1.1.3',
+		'srcMask' => '.1.3.6.1.4.1.14988.1.1.2.1.1.4',
+		'dstAddr' => '.1.3.6.1.4.1.14988.1.1.2.1.1.5',
+		'dstMask' => '.1.3.6.1.4.1.14988.1.1.2.1.1.6',
+		'iFace' => '.1.3.6.1.4.1.14988.1.1.2.1.1.7',
+		'BytesIn' => '.1.3.6.1.4.1.14988.1.1.2.1.1.8',
+		'BytesOut' => '.1.3.6.1.4.1.14988.1.1.2.1.1.9',
+		'PacketsIn' => '.1.3.6.1.4.1.14988.1.1.2.1.1.10',
 		'Packetsout' => '.1.3.6.1.4.1.14988.1.1.2.1.1.11',
-		'QueuesIn'   => '.1.3.6.1.4.1.14988.1.1.2.1.1.12',
-		'QueuesOut'  => '.1.3.6.1.4.1.14988.1.1.2.1.1.13',
-		'DroppedIn'  => '.1.3.6.1.4.1.14988.1.1.2.1.1.14',
+		'QueuesIn' => '.1.3.6.1.4.1.14988.1.1.2.1.1.12',
+		'QueuesOut' => '.1.3.6.1.4.1.14988.1.1.2.1.1.13',
+		'DroppedIn' => '.1.3.6.1.4.1.14988.1.1.2.1.1.14',
 		'DroppedOut' => '.1.3.6.1.4.1.14988.1.1.2.1.1.15',
 	);
 
 	$mikrotikWirelessAps = array(
-		'apSSID'            => '.1.3.6.1.4.1.14988.1.1.1.3.1.4',
-		'apTxRate'          => '.1.3.6.1.4.1.14988.1.1.1.3.1.2',
-		'apRxRate'          => '.1.3.6.1.4.1.14988.1.1.1.3.1.3',
-		'apBSSID'           => '.1.3.6.1.4.1.14988.1.1.1.3.1.5',
-		'apClientCount'     => '.1.3.6.1.4.1.14988.1.1.1.3.1.6',
-		'apFreq'            => '.1.3.6.1.4.1.14988.1.1.1.3.1.7',
-		'apBand'            => '.1.3.6.1.4.1.14988.1.1.1.3.1.8',
-		'apNoiseFloor'      => '.1.3.6.1.4.1.14988.1.1.1.3.1.9',
-		'apOverallTxCCQ'    => '.1.3.6.1.4.1.14988.1.1.1.3.1.10',
+		'apSSID' => '.1.3.6.1.4.1.14988.1.1.1.3.1.4',
+		'apTxRate' => '.1.3.6.1.4.1.14988.1.1.1.3.1.2',
+		'apRxRate' => '.1.3.6.1.4.1.14988.1.1.1.3.1.3',
+		'apBSSID' => '.1.3.6.1.4.1.14988.1.1.1.3.1.5',
+		'apClientCount' => '.1.3.6.1.4.1.14988.1.1.1.3.1.6',
+		'apFreq' => '.1.3.6.1.4.1.14988.1.1.1.3.1.7',
+		'apBand' => '.1.3.6.1.4.1.14988.1.1.1.3.1.8',
+		'apNoiseFloor' => '.1.3.6.1.4.1.14988.1.1.1.3.1.9',
+		'apOverallTxCCQ' => '.1.3.6.1.4.1.14988.1.1.1.3.1.10',
 		'apAuthClientCount' => '.1.3.6.1.4.1.14988.1.1.1.3.1.11',
 	);
 
 	$mikrotikWirelessRegistrations = array(
-		'index'           => '.1.3.6.1.4.1.14988.1.1.1.2.1.1',
-		'Strength'        => '.1.3.6.1.4.1.14988.1.1.1.2.1.3',
-		'TxBytes'         => '.1.3.6.1.4.1.14988.1.1.1.2.1.4',
-		'RxBytes'         => '.1.3.6.1.4.1.14988.1.1.1.2.1.5',
-		'TxPackets'       => '.1.3.6.1.4.1.14988.1.1.1.2.1.6',
-		'RxPackets'       => '.1.3.6.1.4.1.14988.1.1.1.2.1.7',
-		'TxRate'          => '.1.3.6.1.4.1.14988.1.1.1.2.1.8',
-		'RxRate'          => '.1.3.6.1.4.1.14988.1.1.1.2.1.9',
+		'index' => '.1.3.6.1.4.1.14988.1.1.1.2.1.1',
+		'Strength' => '.1.3.6.1.4.1.14988.1.1.1.2.1.3',
+		'TxBytes' => '.1.3.6.1.4.1.14988.1.1.1.2.1.4',
+		'RxBytes' => '.1.3.6.1.4.1.14988.1.1.1.2.1.5',
+		'TxPackets' => '.1.3.6.1.4.1.14988.1.1.1.2.1.6',
+		'RxPackets' => '.1.3.6.1.4.1.14988.1.1.1.2.1.7',
+		'TxRate' => '.1.3.6.1.4.1.14988.1.1.1.2.1.8',
+		'RxRate' => '.1.3.6.1.4.1.14988.1.1.1.2.1.9',
 		'RouterOSVersion' => '.1.3.6.1.4.1.14988.1.1.1.2.1.10',
-		'Uptime'          => '.1.3.6.1.4.1.14988.1.1.1.2.1.11',
-		'SignalToNoise'   => '.1.3.6.1.4.1.14988.1.1.1.2.1.12',
-		'TxStrengthCh0'   => '.1.3.6.1.4.1.14988.1.1.1.2.1.13',
-		'RxStrengthCh0'   => '.1.3.6.1.4.1.14988.1.1.1.2.1.14',
-		'TxStrengthCh1'   => '.1.3.6.1.4.1.14988.1.1.1.2.1.15',
-		'RxStrengthChl'   => '.1.3.6.1.4.1.14988.1.1.1.2.1.16',
-		'TxStrengthCh2'   => '.1.3.6.1.4.1.14988.1.1.1.2.1.17',
-		'RxStrengthCh2'   => '.1.3.6.1.4.1.14988.1.1.1.2.1.18',
-		'TxStrength'      => '.1.3.6.1.4.1.14988.1.1.1.2.1.19',
+		'Uptime' => '.1.3.6.1.4.1.14988.1.1.1.2.1.11',
+		'SignalToNoise' => '.1.3.6.1.4.1.14988.1.1.1.2.1.12',
+		'TxStrengthCh0' => '.1.3.6.1.4.1.14988.1.1.1.2.1.13',
+		'RxStrengthCh0' => '.1.3.6.1.4.1.14988.1.1.1.2.1.14',
+		'TxStrengthCh1' => '.1.3.6.1.4.1.14988.1.1.1.2.1.15',
+		'RxStrengthChl' => '.1.3.6.1.4.1.14988.1.1.1.2.1.16',
+		'TxStrengthCh2' => '.1.3.6.1.4.1.14988.1.1.1.2.1.17',
+		'RxStrengthCh2' => '.1.3.6.1.4.1.14988.1.1.1.2.1.18',
+		'TxStrength' => '.1.3.6.1.4.1.14988.1.1.1.2.1.19',
 	);
 
 	$mikrotikInterfaces = array(
-		'name'             => '.1.3.6.1.4.1.14988.1.1.14.1.1.2',
-		'RxBytes'          => '.1.3.6.1.4.1.14988.1.1.14.1.1.31',
-		'RxPackets'        => '.1.3.6.1.4.1.14988.1.1.14.1.1.12',
-		'RxTooShort'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.33',
-		'RxTo64'           => '.1.3.6.1.4.1.14988.1.1.14.1.1.34',
-		'Rx65To127'        => '.1.3.6.1.4.1.14988.1.1.14.1.1.35',
-		'Rx128to255'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.36',
-		'Rx256to511'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.37',
-		'Rx512to1023'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.38',
-		'Rx1024to1518'     => '.1.3.6.1.4.1.14988.1.1.14.1.1.39',
-		'Rx1519toMax'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.40',
-		'RxTooLong'        => '.1.3.6.1.4.1.14988.1.1.14.1.1.41',
-		'RxBroadcast'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.42',
-		'RxPause'          => '.1.3.6.1.4.1.14988.1.1.14.1.1.43',
-		'RxMulticast'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.44',
-		'RxFCFSError'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.45',
-		'RxAlignError'     => '.1.3.6.1.4.1.14988.1.1.14.1.1.46',
-		'RxFragment'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.47',
-		'RxOverflow'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.48',
-		'RxControl'        => '.1.3.6.1.4.1.14988.1.1.14.1.1.49',
-		'RxUnknownOp'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.50',
-		'RxLengthError'    => '.1.3.6.1.4.1.14988.1.1.14.1.1.51',
-		'RxCodeError'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.52',
-		'RxCarrierError'   => '.1.3.6.1.4.1.14988.1.1.14.1.1.53',
-		'RxJabber'         => '.1.3.6.1.4.1.14988.1.1.14.1.1.54',
-		'RxDrop'           => '.1.3.6.1.4.1.14988.1.1.14.1.1.55',
-		'TxBytes'          => '.1.3.6.1.4.1.14988.1.1.14.1.1.61',
-		'TxPackets'        => '.1.3.6.1.4.1.14988.1.1.14.1.1.14',
-		'TxTooShort'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.63',
-		'TxTo64'           => '.1.3.6.1.4.1.14988.1.1.14.1.1.64',
-		'Tx65To127'        => '.1.3.6.1.4.1.14988.1.1.14.1.1.65',
-		'Tx128to255'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.66',
-		'Tx256to511'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.67',
-		'Tx512to1023'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.68',
-		'Tx1024to1518'     => '.1.3.6.1.4.1.14988.1.1.14.1.1.69',
-		'Tx1519toMax'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.70',
-		'TxTooLong'        => '.1.3.6.1.4.1.14988.1.1.14.1.1.71',
-		'TxBroadcast'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.72',
-		'TxPause'          => '.1.3.6.1.4.1.14988.1.1.14.1.1.73',
-		'TxMulticast'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.74',
-		'TxUnderrun'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.75',
-		'TxCollision'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.76',
-		'TxExCollision'    => '.1.3.6.1.4.1.14988.1.1.14.1.1.77',
-		'TxMultCollision'  => '.1.3.6.1.4.1.14988.1.1.14.1.1.78',
-		'TxSingCollision'  => '.1.3.6.1.4.1.14988.1.1.14.1.1.79',
-		'TxExDeferred'     => '.1.3.6.1.4.1.14988.1.1.14.1.1.80',
-		'TxDeferred'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.81',
-		'TxLateCollision'  => '.1.3.6.1.4.1.14988.1.1.14.1.1.82',
+		'name' => '.1.3.6.1.4.1.14988.1.1.14.1.1.2',
+		'RxBytes' => '.1.3.6.1.4.1.14988.1.1.14.1.1.31',
+		'RxPackets' => '.1.3.6.1.4.1.14988.1.1.14.1.1.12',
+		'RxTooShort' => '.1.3.6.1.4.1.14988.1.1.14.1.1.33',
+		'RxTo64' => '.1.3.6.1.4.1.14988.1.1.14.1.1.34',
+		'Rx65To127' => '.1.3.6.1.4.1.14988.1.1.14.1.1.35',
+		'Rx128to255' => '.1.3.6.1.4.1.14988.1.1.14.1.1.36',
+		'Rx256to511' => '.1.3.6.1.4.1.14988.1.1.14.1.1.37',
+		'Rx512to1023' => '.1.3.6.1.4.1.14988.1.1.14.1.1.38',
+		'Rx1024to1518' => '.1.3.6.1.4.1.14988.1.1.14.1.1.39',
+		'Rx1519toMax' => '.1.3.6.1.4.1.14988.1.1.14.1.1.40',
+		'RxTooLong' => '.1.3.6.1.4.1.14988.1.1.14.1.1.41',
+		'RxBroadcast' => '.1.3.6.1.4.1.14988.1.1.14.1.1.42',
+		'RxPause' => '.1.3.6.1.4.1.14988.1.1.14.1.1.43',
+		'RxMulticast' => '.1.3.6.1.4.1.14988.1.1.14.1.1.44',
+		'RxFCFSError' => '.1.3.6.1.4.1.14988.1.1.14.1.1.45',
+		'RxAlignError' => '.1.3.6.1.4.1.14988.1.1.14.1.1.46',
+		'RxFragment' => '.1.3.6.1.4.1.14988.1.1.14.1.1.47',
+		'RxOverflow' => '.1.3.6.1.4.1.14988.1.1.14.1.1.48',
+		'RxControl' => '.1.3.6.1.4.1.14988.1.1.14.1.1.49',
+		'RxUnknownOp' => '.1.3.6.1.4.1.14988.1.1.14.1.1.50',
+		'RxLengthError' => '.1.3.6.1.4.1.14988.1.1.14.1.1.51',
+		'RxCodeError' => '.1.3.6.1.4.1.14988.1.1.14.1.1.52',
+		'RxCarrierError' => '.1.3.6.1.4.1.14988.1.1.14.1.1.53',
+		'RxJabber' => '.1.3.6.1.4.1.14988.1.1.14.1.1.54',
+		'RxDrop' => '.1.3.6.1.4.1.14988.1.1.14.1.1.55',
+		'TxBytes' => '.1.3.6.1.4.1.14988.1.1.14.1.1.61',
+		'TxPackets' => '.1.3.6.1.4.1.14988.1.1.14.1.1.14',
+		'TxTooShort' => '.1.3.6.1.4.1.14988.1.1.14.1.1.63',
+		'TxTo64' => '.1.3.6.1.4.1.14988.1.1.14.1.1.64',
+		'Tx65To127' => '.1.3.6.1.4.1.14988.1.1.14.1.1.65',
+		'Tx128to255' => '.1.3.6.1.4.1.14988.1.1.14.1.1.66',
+		'Tx256to511' => '.1.3.6.1.4.1.14988.1.1.14.1.1.67',
+		'Tx512to1023' => '.1.3.6.1.4.1.14988.1.1.14.1.1.68',
+		'Tx1024to1518' => '.1.3.6.1.4.1.14988.1.1.14.1.1.69',
+		'Tx1519toMax' => '.1.3.6.1.4.1.14988.1.1.14.1.1.70',
+		'TxTooLong' => '.1.3.6.1.4.1.14988.1.1.14.1.1.71',
+		'TxBroadcast' => '.1.3.6.1.4.1.14988.1.1.14.1.1.72',
+		'TxPause' => '.1.3.6.1.4.1.14988.1.1.14.1.1.73',
+		'TxMulticast' => '.1.3.6.1.4.1.14988.1.1.14.1.1.74',
+		'TxUnderrun' => '.1.3.6.1.4.1.14988.1.1.14.1.1.75',
+		'TxCollision' => '.1.3.6.1.4.1.14988.1.1.14.1.1.76',
+		'TxExCollision' => '.1.3.6.1.4.1.14988.1.1.14.1.1.77',
+		'TxMultCollision' => '.1.3.6.1.4.1.14988.1.1.14.1.1.78',
+		'TxSingCollision' => '.1.3.6.1.4.1.14988.1.1.14.1.1.79',
+		'TxExDeferred' => '.1.3.6.1.4.1.14988.1.1.14.1.1.80',
+		'TxDeferred' => '.1.3.6.1.4.1.14988.1.1.14.1.1.81',
+		'TxLateCollision' => '.1.3.6.1.4.1.14988.1.1.14.1.1.82',
 		'TxTotalCollision' => '.1.3.6.1.4.1.14988.1.1.14.1.1.83',
-		'TxPauseHonored'   => '.1.3.6.1.4.1.14988.1.1.14.1.1.84',
-		'TxDrop'           => '.1.3.6.1.4.1.14988.1.1.14.1.1.85',
-		'TxJabber'         => '.1.3.6.1.4.1.14988.1.1.14.1.1.86',
-		'TxFCFSError'      => '.1.3.6.1.4.1.14988.1.1.14.1.1.87',
-		'TxControl'        => '.1.3.6.1.4.1.14988.1.1.14.1.1.88',
-		'TxFragment'       => '.1.3.6.1.4.1.14988.1.1.14.1.1.89',
+		'TxPauseHonored' => '.1.3.6.1.4.1.14988.1.1.14.1.1.84',
+		'TxDrop' => '.1.3.6.1.4.1.14988.1.1.14.1.1.85',
+		'TxJabber' => '.1.3.6.1.4.1.14988.1.1.14.1.1.86',
+		'TxFCFSError' => '.1.3.6.1.4.1.14988.1.1.14.1.1.87',
+		'TxControl' => '.1.3.6.1.4.1.14988.1.1.14.1.1.88',
+		'TxFragment' => '.1.3.6.1.4.1.14988.1.1.14.1.1.89',
 	);
 
 	$mikrotikProcessor = array(
 		'baseOID' => '.1.3.6.1.2.1.25.3.3.1',
-		'load'    => '.1.3.6.1.2.1.25.3.3.1.2'
+		'load' => '.1.3.6.1.2.1.25.3.3.1.2'
 	);
 
 	if (isset($_SESSION['mikrotik_message']) && $_SESSION['mikrotik_message'] != '') {
@@ -1287,24 +1310,26 @@ function mikrotik_config_arrays() {
 	mikrotik_check_upgrade();
 }
 
-function mikrotik_draw_navigation_text($nav) {
-	$nav['mikrotik.php:']              = array('title' => __('MikroTik', 'mikrotik'), 'mapping' => '', 'url' => 'mikrotik.php', 'level' => '0');
-	$nav['mikrotik.php:devices']       = array('title' => __('Devices', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
-	$nav['mikrotik.php:trees']         = array('title' => __('Trees', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
-	$nav['mikrotik.php:queues']        = array('title' => __('Simple Queues', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
-	$nav['mikrotik.php:users']         = array('title' => __('Users', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
-	$nav['mikrotik.php:interfaces']    = array('title' => __('Interfaces', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
-	$nav['mikrotik.php:storage']       = array('title' => __('Storage', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
-	$nav['mikrotik.php:graphs']        = array('title' => __('Graphs', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
-	$nav['mikrotik.php:wireless_aps']  = array('title' => __('Wireless Aps', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
-	$nav['mikrotik_users.php:']        = array('title' => __('MikroTik Users', 'mikrotik'), 'mapping' => 'index.php:', 'url' => 'mikrotik_users.php', 'level' => '1');
-	$nav['mikrotik_users.php:edit']    = array('title' => __('(edit)', 'mikrotik'), 'mapping' => 'index.php:,mikrotik_users.php:', 'url' => '', 'level' => '2');
+function mikrotik_draw_navigation_text($nav)
+{
+	$nav['mikrotik.php:'] = array('title' => __('MikroTik', 'mikrotik'), 'mapping' => '', 'url' => 'mikrotik.php', 'level' => '0');
+	$nav['mikrotik.php:devices'] = array('title' => __('Devices', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
+	$nav['mikrotik.php:trees'] = array('title' => __('Trees', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
+	$nav['mikrotik.php:queues'] = array('title' => __('Simple Queues', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
+	$nav['mikrotik.php:users'] = array('title' => __('Users', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
+	$nav['mikrotik.php:interfaces'] = array('title' => __('Interfaces', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
+	$nav['mikrotik.php:storage'] = array('title' => __('Storage', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
+	$nav['mikrotik.php:graphs'] = array('title' => __('Graphs', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
+	$nav['mikrotik.php:wireless_aps'] = array('title' => __('Wireless Aps', 'mikrotik'), 'mapping' => 'mikrotik.php:', 'url' => 'mikrotik.php', 'level' => '1');
+	$nav['mikrotik_users.php:'] = array('title' => __('MikroTik Users', 'mikrotik'), 'mapping' => 'index.php:', 'url' => 'mikrotik_users.php', 'level' => '1');
+	$nav['mikrotik_users.php:edit'] = array('title' => __('(edit)', 'mikrotik'), 'mapping' => 'index.php:,mikrotik_users.php:', 'url' => '', 'level' => '2');
 	$nav['mikrotik_users.php:actions'] = array('title' => __('Actions', 'mikrotik'), 'mapping' => 'index.php:,mikrotik_users.php:', 'url' => '', 'level' => '2');
 
 	return $nav;
 }
 
-function mikrotik_show_tab() {
+function mikrotik_show_tab()
+{
 	global $config;
 
 	if (api_user_realm_auth('mikrotik.php')) {
@@ -1316,15 +1341,18 @@ function mikrotik_show_tab() {
 	}
 }
 
-function mikrotik_template_by_hash($hash) {
+function mikrotik_template_by_hash($hash)
+{
 	return db_fetch_cell("SELECT id FROM graph_templates WHERE hash='$hash'");
 }
 
-function mikrotik_data_query_by_hash($hash) {
+function mikrotik_data_query_by_hash($hash)
+{
 	return db_fetch_cell("SELECT id FROM snmp_query WHERE hash='$hash'");
 }
 
-function mikrotik_graphs_url_by_template_hashs($hashes, $host_id = 0, $search = '') {
+function mikrotik_graphs_url_by_template_hashs($hashes, $host_id = 0, $search = '')
+{
 	global $config;
 
 	$sql_where = '';
@@ -1353,7 +1381,8 @@ function mikrotik_graphs_url_by_template_hashs($hashes, $host_id = 0, $search = 
 	}
 }
 
-function mikrotik_host_top() {
+function mikrotik_host_top()
+{
 	global $fields_host_edit;
 
 	$id = get_filter_request_var('id');
@@ -1372,6 +1401,14 @@ function mikrotik_host_top() {
 				'method' => 'spacer',
 				'collapsible' => 'true',
 				'friendly_name' => __('MikroTik Credentials', 'mikrotik')
+			),
+			'mikrotik_api_port' => array(
+				'method' => 'textbox',
+				'friendly_name' => __('API Port', 'mikrotik'),
+				'description' => __('Provide a api port for the MikroTik.', 'mikrotik'),
+				'value' => $is_tik['api_port'] ?? 8722,
+				'max_length' => '5',
+				'size' => '20'
 			),
 			'mikrotik_user' => array(
 				'method' => 'textbox',
@@ -1398,7 +1435,7 @@ function mikrotik_host_top() {
 
 			$api->debug = false;
 
-			if ($api->connect($is_tik['hostname'], $is_tik['user'], $is_tik['password'])) {
+			if ($api->connect($is_tik['hostname'], $is_tik['user'], $is_tik['password'], $is_tik['api_port'])) {
 				$api->disconnect();
 
 				$fields_host_edit += array(
@@ -1423,19 +1460,20 @@ function mikrotik_host_top() {
 	}
 }
 
-function mikrotik_host_save($data) {
+function mikrotik_host_save($data)
+{
 	$id = $data['host_id'];
 
 	if (isset_request_var('mikrotik_user')) {
-		db_execute_prepared('REPLACE INTO plugin_mikrotik_credentials (host_id, user, password) VALUES (?,?,?)', array($id, get_nfilter_request_var('mikrotik_user'), get_nfilter_request_var('mikrotik_password')));
+		db_execute_prepared('REPLACE INTO plugin_mikrotik_credentials (host_id, user, password,api_port) VALUES (?,?,?,?)', array($id, get_nfilter_request_var('mikrotik_user'), get_nfilter_request_var('mikrotik_password'), get_nfilter_request_var('mikrotik_api_port')));
 	}
 
 	return $data;
 }
 
-function mikrotik_host_delete($data) {
+function mikrotik_host_delete($data)
+{
 	db_execute('DELETE * FROM plugin_mikrotik_credentials WHERE host_id IN(' . implode(',', $data) . ')');
 
 	return $data;
 }
-
